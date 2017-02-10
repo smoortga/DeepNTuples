@@ -2,4 +2,5 @@
 <use name="FWCore/PluginManager"/>
 <use name="FWCore/ParameterSet"/>
 <use name="DataFormats/PatCandidates"/>
+<use name="RecoBTau/JetTagComputer"/>
 <flags EDM_PLUGIN="1"/>
