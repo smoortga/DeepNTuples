@@ -12,6 +12,7 @@
 #include "../interface/ntuple_pfCands.h"
 #include "../interface/ntuple_bTagVars.h"
 #include "../interface/ntuple_FatJetInfo.h"
+#include "../interface/ntuple_DeepVertex.h"
 
 //ROOT includes
 #include "TTree.h"
@@ -125,7 +126,13 @@ DeepNtuplizer::DeepNtuplizer(const edm::ParameterSet& iConfig):
     svmodule_LooseIVF->setSVToken(
             consumes<reco::VertexCompositePtrCandidateCollection>(
                     iConfig.getParameter<edm::InputTag>("LooseSVs")));
-    addModule(svmodule_LooseIVF);
+    //addModule(svmodule_LooseIVF);
+    
+    // DeepVertex info
+    ntuple_DeepVertex* deepvertexmodule=new ntuple_DeepVertex(jetR);
+    deepvertexmodule->setCandidatesToken(consumes<edm::View<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("candidates")));
+    deepvertexmodule->setBeamspotToken(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamspot")));
+    addModule(deepvertexmodule);
 
     ntuple_JetInfo* jetinfo=new ntuple_JetInfo();
     jetinfo->setQglToken(consumes<edm::ValueMap<float>>(edm::InputTag(t_qgtagger, "qgLikelihood")));

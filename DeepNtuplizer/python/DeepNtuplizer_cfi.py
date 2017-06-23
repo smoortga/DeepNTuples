@@ -25,4 +25,6 @@ deepntuplizer = cms.EDAnalyzer('DeepNtuplizer',
 		                tagInfoFName = cms.string('pfBoostedDoubleSVAK8'),
                                 bDiscriminators = cms.vstring(),
                                 qgtagger        = cms.string("QGTagger"),
+                                candidates      = cms.InputTag("packedPFCandidates"),
+                                beamspot        = cms.InputTag("offlineBeamSpot")
                                 )
