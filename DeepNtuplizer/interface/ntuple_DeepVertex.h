@@ -37,7 +37,8 @@ private:
     // seed candidates
     static constexpr size_t max_seeds=10;
     
-    //int n_seed=0;
+    int n_seeds=0;
+    
     double seed_pt[max_seeds];
     double seed_eta[max_seeds];
     double seed_phi[max_seeds];
@@ -60,11 +61,14 @@ private:
     double seed_nHits[max_seeds];
     double seed_jetAxisDistance[max_seeds];
     double seed_jetAxisDlength[max_seeds];
-    std::vector<float> seed_ClosestJet_dR;
+    
+    int seed_nNearTracks[max_seeds];
     
     
     //nearest track candidates
     static constexpr size_t max_nearestTrk=200; // 20 per seed
+    
+    int n_NearTracksTotal=0;
     
     double nearTracks_pt[max_nearestTrk];
     double nearTracks_eta[max_nearestTrk];
