@@ -131,7 +131,6 @@ DeepNtuplizer::DeepNtuplizer(const edm::ParameterSet& iConfig):
     // DeepVertex info
     ntuple_DeepVertex* deepvertexmodule=new ntuple_DeepVertex(jetR);
     deepvertexmodule->setCandidatesToken(consumes<edm::View<pat::PackedCandidate> >(iConfig.getParameter<edm::InputTag>("candidates")));
-    deepvertexmodule->setBeamspotToken(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamspot")));
     addModule(deepvertexmodule);
 
     ntuple_JetInfo* jetinfo=new ntuple_JetInfo();

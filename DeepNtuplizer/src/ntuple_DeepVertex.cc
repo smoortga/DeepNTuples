@@ -7,79 +7,12 @@
 
 
 #include "../interface/ntuple_DeepVertex.h"
-// for ivf
-// #include "DataFormats/VertexReco/interface/VertexFwd.h"
-// #include "DataFormats/VertexReco/interface/Vertex.h"
-// #include "DataFormats/Candidate/interface/VertexCompositePtrCandidate.h"
-// #include "DataFormats/TrackReco/interface/Track.h"
-// #include "TLorentzVector.h"
-// #include "DataFormats/Math/interface/deltaR.h"
-// #include "TrackingTools/IPTools/interface/IPTools.h"
-// #include "DataFormats/GeometryCommonDetAlgo/interface/Measurement1D.h"
 
-
-// system include files
-//#include <memory>
 #include "DataFormats/GeometrySurface/interface/Line.h"
 
-// user include files
-//#include "FWCore/Framework/interface/Frameworkfwd.h"
-//#include "FWCore/Framework/interface/one/EDAnalyzer.h"
-
-//#include "FWCore/Framework/interface/Event.h"
-//#include "FWCore/Framework/interface/MakerMacros.h"
-
-//#include "FWCore/ParameterSet/interface/ParameterSet.h"
-
-//#include "FWCore/Framework/interface/ESHandle.h"
-//#include "FWCore/ServiceRegistry/interface/Service.h"
-//#include "CommonTools/UtilAlgos/interface/TFileService.h"
-//#include "TTree.h"
-
-
-#include "DataFormats/JetReco/interface/PFJet.h"
-#include <DataFormats/TrackReco/interface/Track.h>
-//#include "DataFormats/VertexReco/interface/Vertex.h"
-//#include "RecoBTag/SecondaryVertex/interface/SecondaryVertex.h"
-
-//#include "DataFormats/Candidate/interface/VertexCompositePtrCandidateFwd.h"
-
-// #include "RecoVertex/VertexPrimitives/interface/BasicVertexState.h"
-// #include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
-// #include "RecoVertex/VertexPrimitives/interface/VertexState.h"
-// #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
-// #include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
-// #include "RecoVertex/VertexTools/interface/VertexDistance.h"
-// #include "RecoVertex/VertexTools/interface/SharedTracks.h"
-
-#include <DataFormats/Candidate/interface/Candidate.h>
-//#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/CandidatePtrTransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "TrackingTools/PatternTools/interface/TwoTrackMinimumDistance.h"
-
-
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
-#include "../interface/trackVars2.h"
-
-#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
-//#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
-
-#include "DataFormats/PatCandidates/interface/Jet.h"
-
-#include "DataFormats/BeamSpot/interface/BeamSpot.h"
-
-#include "TrackingTools/GeomPropagators/interface/AnalyticalImpactPointExtrapolator.h"
-//#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
-
-//#include "SimDataFormats/JetMatching/interface/JetFlavourInfoMatching.h"
-
 
 
 
@@ -95,8 +28,6 @@ void ntuple_DeepVertex::getInput(const edm::ParameterSet& iConfig){
 }
 
 void ntuple_DeepVertex::initBranches(TTree* tree){
-    addBranch(tree,"n_seed",&n_seed, "n_seed/I");
-
     addBranch(tree,"seed_pt",&seed_pt, "seed_pt[10]/D");
     addBranch(tree,"seed_eta",&seed_eta, "seed_eta[10]/D");
     addBranch(tree,"seed_phi",&seed_phi, "seed_phi[10]/D");
@@ -114,7 +45,6 @@ void ntuple_DeepVertex::initBranches(TTree* tree){
     addBranch(tree,"seed_2D_signedIp", &seed_2D_signedIp, "seed_2D_signedIp[10]/D");
     addBranch(tree,"seed_2D_signedSip", &seed_2D_signedSip, "seed_2D_signedSip[10]/D");
     
-    //addBranch(tree,"seed_JetMatch", &seed_JetMatch, "seed_JetMatch[10]/D");
     addBranch(tree,"seed_chi2reduced",&seed_chi2reduced, "seed_chi2reduced[10]/D");
     addBranch(tree,"seed_nPixelHits",&seed_nPixelHits, "seed_nPixelHits[10]/D");
     addBranch(tree,"seed_nHits",&seed_nHits, "seed_nHits[10]/D");
@@ -124,8 +54,6 @@ void ntuple_DeepVertex::initBranches(TTree* tree){
     
     
     // near Tracks
-    addBranch(tree,"nearTracks_Nvtx", &nearTracks_Nvtx);
-    addBranch(tree,"nearTracks_nTracks", &nearTracks_nTracks);
     addBranch(tree,"nearTracks_pt", &nearTracks_pt, "nearTracks_pt[200]/D");
     addBranch(tree,"nearTracks_eta", &nearTracks_eta, "nearTracks_eta[200]/D");
     addBranch(tree,"nearTracks_phi", &nearTracks_phi, "nearTracks_phi[200]/D");
@@ -177,7 +105,6 @@ void ntuple_DeepVertex::initBranches(TTree* tree){
 void ntuple_DeepVertex::readEvent(const edm::Event& iEvent){
 
     iEvent.getByToken(CandidateToken, tracks);
-    iEvent.getByToken(BeamSpotToken, beamSpot);
 
 }
 
@@ -193,6 +120,67 @@ void ntuple_DeepVertex::readSetup(const edm::EventSetup& iSetup){
 
 bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx, const  edm::View<pat::Jet> * coll){
 
+
+    // fill 0 everywhere (already do zero-padding here, do we want this?)    
+    std::fill_n(seed_pt, 10, 0.);
+    std::fill_n(seed_eta, 10, 0.);
+    std::fill_n(seed_phi, 10, 0.);
+    std::fill_n(seed_mass, 10, 0.);
+    std::fill_n(seed_dz, 10, 0.);
+    std::fill_n(seed_dxy, 10, 0.);
+    std::fill_n(seed_3D_ip, 10, 0.);
+    std::fill_n(seed_3D_sip, 10, 0.);
+    std::fill_n(seed_2D_ip, 10, 0.);
+    std::fill_n(seed_2D_sip, 10, 0.);
+    std::fill_n(seed_3D_signedIp, 10, 0.);
+    std::fill_n(seed_3D_signedSip, 10, 0.);
+    std::fill_n(seed_2D_signedIp, 10, 0.);
+    std::fill_n(seed_2D_signedSip, 10, 0.);
+    std::fill_n(seed_chi2reduced, 10, 0.);
+    std::fill_n(seed_nPixelHits, 10, 0.);
+    std::fill_n(seed_nHits, 10, 0.);
+    std::fill_n(seed_jetAxisDistance, 10, 0.);
+    std::fill_n(seed_jetAxisDlength, 10, 0.);   
+
+    std::fill_n(nearTracks_pt, 200, 0.);
+    std::fill_n(nearTracks_eta, 200, 0.);
+    std::fill_n(nearTracks_phi, 200, 0.);
+    std::fill_n(nearTracks_dz, 200, 0.);
+    std::fill_n(nearTracks_dxy, 200, 0.);
+    std::fill_n(nearTracks_mass, 200, 0.);
+    std::fill_n(nearTracks_3D_ip, 200, 0.);
+    std::fill_n(nearTracks_3D_sip, 200, 0.);
+    std::fill_n(nearTracks_2D_ip, 200, 0.);
+    std::fill_n(nearTracks_2D_sip, 200, 0.);
+    std::fill_n(nearTracks_PCAdist, 200, 0.);
+    std::fill_n(nearTracks_PCAdsig, 200, 0.);
+    std::fill_n(nearTracks_PCAonSeed_x, 200, 0.);
+    std::fill_n(nearTracks_PCAonSeed_y, 200, 0.);
+    std::fill_n(nearTracks_PCAonSeed_z, 200, 0.);
+    std::fill_n(nearTracks_PCAonSeed_xerr, 200, 0.);
+    std::fill_n(nearTracks_PCAonSeed_yerr, 200, 0.);
+    std::fill_n(nearTracks_PCAonSeed_zerr, 200, 0.);
+    std::fill_n(nearTracks_PCAonTrack_x, 200, 0.);
+    std::fill_n(nearTracks_PCAonTrack_y, 200, 0.);
+    std::fill_n(nearTracks_PCAonTrack_z, 200, 0.);
+    std::fill_n(nearTracks_PCAonTrack_xerr, 200, 0.);
+    std::fill_n(nearTracks_PCAonTrack_yerr, 200, 0.);
+    std::fill_n(nearTracks_PCAonTrack_zerr, 200, 0.);
+    std::fill_n(nearTracks_dotprodTrack, 200, 0.);
+    std::fill_n(nearTracks_dotprodSeed, 200, 0.);
+    std::fill_n(nearTracks_dotprodTrackSeed2D, 200, 0.);
+    std::fill_n(nearTracks_dotprodTrackSeed3D, 200, 0.);
+    std::fill_n(nearTracks_dotprodTrackSeedVectors2D, 200, 0.);
+    std::fill_n(nearTracks_dotprodTrackSeedVectors3D, 200, 0.);          
+    std::fill_n(nearTracks_PCAonSeed_pvd, 200, 0.);
+    std::fill_n(nearTracks_PCAonTrack_pvd, 200, 0.);
+    std::fill_n(nearTracks_PCAjetAxis_dist, 200, 0.);
+    std::fill_n(nearTracks_PCAjetMomenta_dotprod, 200, 0.);
+    std::fill_n(nearTracks_PCAjetDirs_DEta, 200, 0.);
+    std::fill_n(nearTracks_PCAjetDirs_DPhi, 200, 0.);
+
+
+
     // pv info
     const reco::Vertex &pv = vertices()->at(0);
     GlobalPoint pvp(pv.x(),pv.y(),pv.z());
@@ -202,22 +190,19 @@ bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx,
     std::vector<float> masses;
     
     
-    //for(typename edm::View<pat::PackedCandidate>::const_iterator track = tracks->begin(); track != tracks->end(); ++track) {
-    for(size_t k = 0; k<tracks->size(); ++k) {
+   for(size_t k = 0; k<tracks->size(); ++k) {
         if((*tracks)[k].bestTrack() != 0 &&  (*tracks)[k].pt()>0.5 && std::fabs(pvp.z()-builder->build(tracks->ptrAt(k)).track().vz())<0.5) {
             selectedTracks.push_back(builder->build(tracks->ptrAt(k)));
+            masses.push_back(tracks->ptrAt(k)->mass());
         }
     }
     
-    std::cout << "TEST1" << std::endl;
-
     double jet_radius = jetR();
     GlobalVector direction(jet.px(), jet.py(), jet.pz());
     
-    unsigned int n_seeds = 0;
+    //unsigned int n_seeds = 0;
     for(std::vector<reco::TransientTrack>::const_iterator it = selectedTracks.begin(); it != selectedTracks.end(); it++){
-        std::cout << "TEST2 in loop" << std::endl;
-        
+
         //is the track in the jet cone?
         float angular_distance=std::sqrt(std::pow(jet.eta()-it->track().eta(),2) + std::pow(jet.phi()-it->track().phi(),2) );
         if (angular_distance>jet_radius) { continue; }
@@ -239,18 +224,16 @@ bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx,
         if (!is_seed_candidate){continue;}
         
         std::pair<bool,Measurement1D> ipSigned = IPTools::signedImpactParameter3D(*it,direction, pv); 
-        n_seeds++;
+        //n_seeds++;
         
         nearTracks.clear();
         //now that we found a seed, loop over all other tracks and look for neighbours
         for(std::vector<reco::TransientTrack>::const_iterator tt = selectedTracks.begin();tt!=selectedTracks.end(); ++tt ) {
-            std::cout << "TEST3 in loop in loop" << std::endl;
             VertexDistance3D distanceComputer;
             TwoTrackMinimumDistance dist;
             if(*tt==*it) continue;
             if(std::fabs(pvp.z()-tt->track().vz())>0.1) continue;
             if(dist.calculate(tt->impactPointState(),it->impactPointState())) {
-                std::cout << "TEST3 in loop in loop condition forfilled" << std::endl;
                 GlobalPoint ttPoint          = dist.points().first;
                 GlobalError ttPointErr       = tt->impactPointState().cartesianError().position();
                 GlobalPoint seedPosition     = dist.points().second;
@@ -258,49 +241,32 @@ bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx,
                 Measurement1D m = distanceComputer.distance(VertexState(seedPosition,seedPositionErr), VertexState(ttPoint, ttPointErr));
                 GlobalPoint cp(dist.crossingPoint()); 
                 
-                std::cout << "TEST31" << std::endl;
-                
                 GlobalVector PairMomentum(it->track().px()+tt->track().px(), it->track().py()+tt->track().py(), it->track().pz()+tt->track().pz());
                 GlobalVector  PCA_pv(cp-pvp);
-
-                 std::cout << "TEST32" << std::endl;
 
                 float PCAseedFromPV =  (dist.points().second-pvp).mag();
                 float PCAtrackFromPV =  (dist.points().first-pvp).mag();               
                 float distance = dist.distance();
 
-                 std::cout << "TEST33" << std::endl;
-                
                 GlobalVector trackDir2D(tt->impactPointState().globalDirection().x(),tt->impactPointState().globalDirection().y(),0.); 
                 GlobalVector seedDir2D(it->impactPointState().globalDirection().x(),it->impactPointState().globalDirection().y(),0.); 
                 GlobalVector trackPCADir2D(dist.points().first.x()-pvp.x(),dist.points().first.y()-pvp.y(),0.); 
                 GlobalVector seedPCADir2D(dist.points().second.x()-pvp.x(),dist.points().second.y()-pvp.y(),0.); 
                 
-                 std::cout << "TEST34" << std::endl;
-
                 float dotprodTrack = (dist.points().first-pvp).unit().dot(tt->impactPointState().globalDirection().unit());
                 float dotprodSeed = (dist.points().second-pvp).unit().dot(it->impactPointState().globalDirection().unit());                    
                 float dotprodTrackSeed2D = trackDir2D.unit().dot(seedDir2D.unit());
                 float dotprodTrackSeed3D = it->impactPointState().globalDirection().unit().dot(tt->impactPointState().globalDirection().unit());
                 float dotprodTrackSeed2DV = trackPCADir2D.unit().dot(seedPCADir2D.unit());
                 float dotprodTrackSeed3DV = (dist.points().second-pvp).unit().dot((dist.points().first-pvp).unit());
-                
-                 std::cout << "TEST35" << std::endl;
 
                 std::pair<bool,Measurement1D> t_ip = IPTools::absoluteImpactParameter3D(*tt,pv);        
                 std::pair<bool,Measurement1D> t_ip2d = IPTools::absoluteTransverseImpactParameter(*tt,pv);
-                
-                 std::cout << "TEST36" << std::endl;
 
                 myTrack.set_values(tt->track().pt(), tt->track().eta(), tt->track().phi(),  tt->track().dz(pv.position()), tt->track().dxy(pv.position()), distance,  m.significance(), seedPosition.x(), seedPosition.y(), seedPosition.z(), seedPositionErr.cxx(), seedPositionErr.cyy(), seedPositionErr.czz(),  ttPoint.x(),  ttPoint.y(),  ttPoint.z(),  ttPointErr.cxx(),  ttPointErr.cyy(),  ttPointErr.czz(), dotprodTrack, dotprodSeed );
-                std::cout << "TEST361" << std::endl;
                 myTrack.set_index(-1);
-                std::cout << "TEST362" << std::endl;
                 myTrack.set_distances(PCAseedFromPV, PCAtrackFromPV);
-                std::cout << "TEST363" << std::endl;
                 myTrack.set_vars(masses[tt-selectedTracks.begin()],t_ip2d.second.value() , t_ip2d.second.significance(), t_ip.second.value() , t_ip.second.significance(), dotprodTrackSeed2D, dotprodTrackSeed3D, dotprodTrackSeed2DV, dotprodTrackSeed3DV ); 
-                
-                 std::cout << "TEST37" << std::endl;
                 
                 Line::PositionType pos(pvp);
                 Line::DirectionType dir(direction);
@@ -311,19 +277,12 @@ bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx,
                 float dotprodMomenta=PairMomentum.unit().dot(direction.unit());
                 float dEta=std::fabs(PCA_pv.eta()-jet.eta());
                 float dPhi=std::fabs(PCA_pv.phi()-jet.phi());
-                
-                 std::cout << "TEST38" << std::endl;
-            
+
                 myTrack.setSeedMass(masses[it-selectedTracks.begin()]);                    
                 myTrack.set_JetAxisVars(PCA_JetAxis_dist,dotprodMomenta,dEta,dPhi);
                 nearTracks.push_back(myTrack);
-                
-                 std::cout << "TEST39" << std::endl;
-          
-            
             
             }
-            std::cout << "TEST3 in loop in loop at the end" << std::endl;
         }            
          
         std::sort (nearTracks.begin(), nearTracks.end(), sortfunction2());
@@ -331,18 +290,12 @@ bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx,
         SortedSeedsMap.insert(std::make_pair(-ipSigned.second.significance(), std::make_pair(&(*it), nearTracks)));
             
     }
-    
-    std::cout << "TEST4 before multimap loop" << std::endl;
        
     unsigned int seeds_max_counter=0;
     for(std::multimap<double,std::pair<const reco::TransientTrack*,const std::vector<trackVars2> > >::const_iterator im = SortedSeedsMap.begin(); im != SortedSeedsMap.end(); im++){
         
         if(seeds_max_counter>=10) break;
         
-        std::cout << "TEST5 in multimap loop" << std::endl;
-        
-        std::cout<<-(im->first)<< "  sorted sips" <<std::endl; 			
-        std::cout << "check the seed again before filling" << im->second.first->track().phi() << " " << im->second.first->track().pt() << " " << im->second.first->track().eta() << std::endl;
         std::pair<bool,Measurement1D> ipSigned = IPTools::signedImpactParameter3D(*im->second.first,direction, pv);        
         std::pair<bool,Measurement1D> ip2dSigned = IPTools::signedTransverseImpactParameter(*im->second.first,direction, pv);  
         std::pair<bool,Measurement1D> ip = IPTools::absoluteImpactParameter3D(*im->second.first, pv);        
@@ -361,8 +314,7 @@ bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx,
         seed_3D_signedIp[seeds_max_counter]=ipSigned.second.value();
         seed_3D_signedSip[seeds_max_counter]=ipSigned.second.significance();
         seed_2D_signedIp[seeds_max_counter]=ip2dSigned.second.value();
-        seed_2D_signedSip[seeds_max_counter]=ip2dSigned.second.significance();
-        //seed_JetMatch[seeds_max_counter]=seed_jet_match_i;			
+        seed_2D_signedSip[seeds_max_counter]=ip2dSigned.second.significance();		
         seed_chi2reduced[seeds_max_counter]=im->second.first->track().normalizedChi2();
         seed_nPixelHits[seeds_max_counter]=im->second.first->track().hitPattern().numberOfValidPixelHits();
         seed_nHits[seeds_max_counter]=im->second.first->track().hitPattern().numberOfValidHits();
@@ -374,47 +326,62 @@ bool ntuple_DeepVertex::fillBranches(const pat::Jet & jet, const size_t& jetidx,
         if (closest.isValid()) seed_jetAxisDlength[seeds_max_counter]=(closest.globalPosition() - pvp).mag(); 
         else seed_jetAxisDlength[seeds_max_counter]= -99;
         
-        // TODO: FILL NEAREAST VARIABLES
+        // FILL NEAREAST VARIABLES
+        for(unsigned int i=0; i< im->second.second.size(); i++) {
+
+            if((seeds_max_counter*20+i)>=200) break;
+            
+			nearTracks_pt[seeds_max_counter*20+i]=im->second.second.at(i).pt;
+            nearTracks_eta[seeds_max_counter*20+i]=im->second.second.at(i).eta;
+            nearTracks_phi[seeds_max_counter*20+i]=im->second.second.at(i).phi;
+            nearTracks_dz[seeds_max_counter*20+i]=im->second.second.at(i).dz;
+            nearTracks_dxy[seeds_max_counter*20+i]=im->second.second.at(i).dxy;
+            nearTracks_mass[seeds_max_counter*20+i]=im->second.second.at(i).mass;
+            nearTracks_3D_ip[seeds_max_counter*20+i]=im->second.second.at(i).t3Dip;
+            nearTracks_3D_sip[seeds_max_counter*20+i]=im->second.second.at(i).t3Dsip;
+            nearTracks_2D_ip[seeds_max_counter*20+i]=im->second.second.at(i).t2Dip;
+            nearTracks_2D_sip[seeds_max_counter*20+i]=im->second.second.at(i).t2Dsip;
+            nearTracks_PCAdist[seeds_max_counter*20+i]=im->second.second.at(i).dist;
+            nearTracks_PCAdsig[seeds_max_counter*20+i]=im->second.second.at(i).dsig;
+            nearTracks_PCAonSeed_x[seeds_max_counter*20+i]=im->second.second.at(i).PCA_sx;
+            nearTracks_PCAonSeed_y[seeds_max_counter*20+i]=im->second.second.at(i).PCA_sy;
+            nearTracks_PCAonSeed_z[seeds_max_counter*20+i]=im->second.second.at(i).PCA_sz;
+            nearTracks_PCAonSeed_xerr[seeds_max_counter*20+i]=im->second.second.at(i).PCA_sxerr;
+            nearTracks_PCAonSeed_yerr[seeds_max_counter*20+i]=im->second.second.at(i).PCA_syerr;
+            nearTracks_PCAonSeed_zerr[seeds_max_counter*20+i]=im->second.second.at(i).PCA_szerr;
+            nearTracks_PCAonTrack_x[seeds_max_counter*20+i]=im->second.second.at(i).PCA_tx;
+            nearTracks_PCAonTrack_y[seeds_max_counter*20+i]=im->second.second.at(i).PCA_ty;
+            nearTracks_PCAonTrack_z[seeds_max_counter*20+i]=im->second.second.at(i).PCA_tz;
+            nearTracks_PCAonTrack_xerr[seeds_max_counter*20+i]=im->second.second.at(i).PCA_txerr;
+            nearTracks_PCAonTrack_yerr[seeds_max_counter*20+i]=im->second.second.at(i).PCA_tyerr;
+            nearTracks_PCAonTrack_zerr[seeds_max_counter*20+i]=im->second.second.at(i).PCA_tzerr;
+            nearTracks_dotprodTrack[seeds_max_counter*20+i]=im->second.second.at(i).dotprodTrack;
+            nearTracks_dotprodSeed[seeds_max_counter*20+i]=im->second.second.at(i).dotprodSeed;
+            nearTracks_dotprodTrackSeed2D[seeds_max_counter*20+i]=im->second.second.at(i).dotprodTrackSeed2D;
+            nearTracks_dotprodTrackSeed3D[seeds_max_counter*20+i]=im->second.second.at(i).dotprodTrackSeed3D;
+            nearTracks_dotprodTrackSeedVectors2D[seeds_max_counter*20+i]=im->second.second.at(i).dotprodTrackSeedVectors2D;
+            nearTracks_dotprodTrackSeedVectors3D[seeds_max_counter*20+i]=im->second.second.at(i).dotprodTrackSeedVectors3D;
+
+            nearTracks_PCAonSeed_pvd[seeds_max_counter*20+i]=im->second.second.at(i).seedPCA_pv;
+            nearTracks_PCAonTrack_pvd[seeds_max_counter*20+i]=im->second.second.at(i).trackPCA_pv;
+
+            nearTracks_PCAjetAxis_dist[seeds_max_counter*20+i]=im->second.second.at(i).PCA_JetAxis_distance;
+            nearTracks_PCAjetMomenta_dotprod[seeds_max_counter*20+i]=im->second.second.at(i).PCAPair_Jet_dotprod;
+
+            nearTracks_PCAjetDirs_DEta[seeds_max_counter*20+i]=im->second.second.at(i).PCAAxis_JetAxis_DEta;
+            nearTracks_PCAjetDirs_DPhi[seeds_max_counter*20+i]=im->second.second.at(i).PCAAxis_JetAxis_DPhi;
+
+        }
+        
+        // *********
         
         seeds_max_counter++; 
     }
     
-    std::cout << "TEST6" << std::endl;
     SortedSeedsMap.clear();
     nearTracks.clear();
+    masses.clear();
 
     return true;
 }
-
-
-
-
-
-
-
-
-
-///helpers seldomly touched
-
-
-
-// Measurement1D ntuple_SV::vertexDxy(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  {
-//     VertexDistanceXY dist;
-//     reco::Vertex::CovarianceMatrix csv; svcand.fillVertexCovariance(csv);
-//     reco::Vertex svtx(svcand.vertex(), csv);
-//     return dist.distance(svtx, pv);
-// }
-// 
-// Measurement1D ntuple_SV::vertexD3d(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  {
-//     VertexDistance3D dist;
-//     reco::Vertex::CovarianceMatrix csv; svcand.fillVertexCovariance(csv);
-//     reco::Vertex svtx(svcand.vertex(), csv);
-//     return dist.distance(svtx, pv);
-// }
-// 
-// float ntuple_SV::vertexDdotP(const reco::VertexCompositePtrCandidate &sv, const reco::Vertex &pv)  {
-//     reco::Candidate::Vector p = sv.momentum();
-//     reco::Candidate::Vector d(sv.vx() - pv.x(), sv.vy() - pv.y(), sv.vz() - pv.z());
-//     return p.Unit().Dot(d.Unit());
-// }
 

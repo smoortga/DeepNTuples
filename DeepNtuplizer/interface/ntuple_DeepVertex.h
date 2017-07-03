@@ -10,7 +10,6 @@
 
 #include "ntuple_content.h"
 #include "trackVars2.h"
-//#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 
 class ntuple_DeepVertex: public ntuple_content{
@@ -32,17 +31,13 @@ public:
     void setCandidatesToken(const edm::EDGetTokenT<edm::View<pat::PackedCandidate> > & t){
         CandidateToken=t;
      }
-    
-    void setBeamspotToken(const edm::EDGetTokenT<reco::BeamSpot> & t){
-        BeamSpotToken=t;
-     }
 
 private:
 
     // seed candidates
     static constexpr size_t max_seeds=10;
     
-    int n_seed=0;
+    //int n_seed=0;
     double seed_pt[max_seeds];
     double seed_eta[max_seeds];
     double seed_phi[max_seeds];
@@ -71,8 +66,6 @@ private:
     //nearest track candidates
     static constexpr size_t max_nearestTrk=200; // 20 per seed
     
-    std::vector<int> nearTracks_Nvtx;
-    std::vector<int> nearTracks_nTracks;//max 20
     double nearTracks_pt[max_nearestTrk];
     double nearTracks_eta[max_nearestTrk];
     double nearTracks_phi[max_nearestTrk];
@@ -111,45 +104,27 @@ private:
     double nearTracks_PCAjetDirs_DPhi[max_nearestTrk];
     
     
-    // IVF cut parameters
+    // IVF cut parameters (HARDCODED?? OR CONFIGURABLE IN PYTHON CONFIG)
     float min3DIPValue=0.005;
     float min3DIPSignificance=1.2;
     int max3DIPValue=9999.;
     int max3DIPSignificance=9999.;
     
 
-
-
-
     //tokens to be defined from main analyzer
-    //edm::EDGetTokenT<reco::VertexCollection> token_primaryVertex;
-    edm::EDGetTokenT<reco::BeamSpot> BeamSpotToken;
     edm::EDGetTokenT<edm::View<pat::PackedCandidate> > CandidateToken;
 
     //helper:
-    //edm::Handle<reco::VertexCollection > primaryVertices;
-    edm::Handle<reco::BeamSpot> beamSpot;
     edm::Handle<edm::View<pat::PackedCandidate> > tracks;
     
-    //std::pair<int, float> pair;
-    //std::multimap<double,std::pair<const reco::TransientTrack*,const std::vector<trackVars2> > > SortedSeedsMap; 
-    //std::vector<trackVars2>>> SortedSeedsMap;
-    
+    // builder    
     edm::ESHandle<TransientTrackBuilder> builder;
     
     // temporary containers
     trackVars2 myTrack;
     std::vector<trackVars2> nearTracks; 
-     std::multimap<double,std::pair<const reco::TransientTrack*,const std::vector<trackVars2> > > SortedSeedsMap;
+    std::multimap<double,std::pair<const reco::TransientTrack*,const std::vector<trackVars2> > > SortedSeedsMap;
 
-    // static const reco::Vertex * spvp_;
-// 
-//     static bool compareDxyDxyErr(const reco::VertexCompositePtrCandidate &sva,const reco::VertexCompositePtrCandidate &svb);
-// 
-//     //helper functions:
-//     static Measurement1D vertexDxy(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
-//     static Measurement1D vertexD3d(const reco::VertexCompositePtrCandidate &svcand, const reco::Vertex &pv)  ;
-//     static float vertexDdotP(const reco::VertexCompositePtrCandidate &sv, const reco::Vertex &pv)  ;
 
 };
 
